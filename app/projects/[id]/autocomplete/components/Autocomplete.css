@@ -1,0 +1,161 @@
+.autocomplete-container {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.autocomplete-input {
+  width: 100%;
+  padding: 12px 40px 12px 12px;
+  font-size: 16px;
+  border: 2px solid #4d648d;
+  border-radius: 8px;
+  outline: none;
+  background-color: #ffffff;
+  color: #1e1f26;
+}
+
+.autocomplete-input::placeholder {
+  color: #4d648d;
+}
+
+.autocomplete-input:focus {
+  border-color: #283655;
+}
+
+.loading-spinner {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  border: 2px solid #d0e1f9;
+  border-top: 2px solid #4d648d;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+
+.suggestions-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 4px;
+  padding: 0;
+  list-style: none;
+  background: #ffffff;
+  border: 1px solid #4d648d;
+  border-radius: 8px;
+  max-height: 400px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  z-index: 1000;
+}
+
+.suggestion-item {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  cursor: pointer;
+  border-bottom: 1px solid #d0e1f9;
+}
+
+.suggestion-item:last-child {
+  border-bottom: none;
+}
+
+.suggestion-item:hover,
+.suggestion-item--active {
+  background-color: #989fc5;
+}
+
+.suggestion-thumbnail {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 4px;
+  margin-right: 12px;
+  border: 1px solid #4d648d;
+}
+
+.suggestion-details {
+  flex: 1;
+}
+
+.suggestion-title {
+  font-weight: 500;
+  margin-bottom: 4px;
+  color: #1e1f26;
+}
+
+.product-details {
+  display: flex;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.product-thumbnail {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid #4d648d;
+}
+
+.product-details h4 {
+  color: #1e1f26;
+  margin: 0 0 8px 0;
+  font-weight: 600;
+}
+
+.product-details p {
+  color: #283655;
+  margin: 8px 0;
+  line-height: 1.4;
+}
+
+.product-price {
+  color: #283655;
+  font-weight: 600;
+  font-size: 1.2em;
+  margin-top: 8px;
+  background-color: #d0e1f9;
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+/* Scrollbar Styles */
+.suggestions-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.suggestions-list::-webkit-scrollbar-track {
+  background: #d0e1f9;
+  border-radius: 4px;
+}
+
+.suggestions-list::-webkit-scrollbar-thumb {
+  background: #4d648d;
+  border-radius: 4px;
+}
+
+.suggestions-list::-webkit-scrollbar-thumb:hover {
+  background: #283655;
+}
+
+.highlight {
+  background-color: #d0e1f9;
+  padding: 0 2px;
+  border-radius: 2px;
+  font-weight: 600;
+  color: #283655;
+}

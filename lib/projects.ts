@@ -1,23 +1,24 @@
 export interface DemoLink {
-  title: string
-  path: string
+  title: string;
+  path: string;
 }
 
 export interface Project {
-  id: string
-  title: string
-  description: string
-  longDescription: string
-  technologies: string[]
-  codeSnippet: string
-  demoLinks?: DemoLink[]
+  id: string;
+  title: string;
+  description: string;
+  longDescription: string;
+  technologies: string[];
+  codeSnippet: string;
+  demoLinks?: DemoLink[];
 }
 
 export const projects: Project[] = [
   {
     id: "1",
     title: "Binary Search Tree Visualizer",
-    description: "Interactive visualization of BST operations with step-by-step animations",
+    description:
+      "Interactive visualization of BST operations with step-by-step animations",
     longDescription:
       "This project provides an interactive visualization of Binary Search Tree (BST) operations. Users can insert, delete, and search for nodes in the BST, with step-by-step animations showing how each operation affects the tree structure. This tool is designed to help students and developers better understand the mechanics of BSTs.",
     technologies: ["TypeScript", "React", "Canvas API"],
@@ -106,14 +107,14 @@ function aStar(start, goal, h) {
     id: "3",
     title: "Autocomplete Component",
     description: "A reusable autocomplete component with TypeScript and React",
-    longDescription: 
+    longDescription:
       "This project demonstrates the implementation of a performant autocomplete component built with React and TypeScript. It features debounced input handling, keyboard navigation, and customizable suggestion rendering. The component is designed to be reusable and accessible, following modern web development best practices.",
     technologies: ["TypeScript", "React", "Tailwind CSS", "Accessibility"],
     demoLinks: [
       {
         title: "Interactive Autocomplete Demo",
-        path: "autocomplete"
-      }
+        path: "autocomplete",
+      },
     ],
     codeSnippet: `
 const Autocomplete = ({ 
@@ -156,7 +157,61 @@ const Autocomplete = ({
       )}
     </div>
   );
-};`
+};`,
   },
-]
+  {
+    id: "4",
+    title: "Real-time Tic Tac Toe",
+    description:
+      "Multiplayer Tic Tac Toe game with real-time updates using Socket.IO",
+    longDescription:
+      "A real-time multiplayer Tic Tac Toe game implemented using Socket.IO and Next.js. Players can join the game and make moves that are instantly synchronized across all connected clients. The game features real-time state management, move validation, win detection, and game reset functionality.",
+    technologies: [
+      "TypeScript",
+      "Next.js",
+      "Socket.IO",
+      "React",
+      "Tailwind CSS",
+    ],
+    demoLinks: [
+      {
+        title: "Play Tic Tac Toe",
+        path: "tictactoe",
+      },
+    ],
+    codeSnippet: `
+// Socket.IO game state management
+io.on('connection', (socket) => {
+  // Send current game state to new players
+  socket.emit('gameState', gameState)
 
+  socket.on('makeMove', (index: number) => {
+    if (gameState.board[index] || gameState.winner !== "none") return
+
+    // Update game state
+    gameState.board[index] = gameState.xIsNext ? 'X' : 'O'
+    gameState.xIsNext = !gameState.xIsNext
+
+    // Check for winner
+    const winner = calculateWinner(gameState.board)
+    if (winner) {
+      gameState.winner = winner
+    } else if (!gameState.board.includes(null)) {
+      gameState.winner = "draw"
+    }
+
+    // Broadcast updated state to all clients
+    io.emit('gameState', gameState)
+  })
+
+  socket.on('resetGame', () => {
+    gameState = {
+      board: Array(9).fill(null),
+      xIsNext: true,
+      winner: "none"
+    }
+    io.emit('gameState', gameState)
+  })
+})`,
+  },
+];

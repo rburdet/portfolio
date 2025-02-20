@@ -43,7 +43,6 @@ app.prepare().then(() => {
       socket.emit('gameState', gameState)
 
       socket.on('makeMove', (index) => {
-        console.log('Move made at index:', index)
         
         if (gameState.board[index] || gameState.winner !== "none") return
 
@@ -56,17 +55,19 @@ app.prepare().then(() => {
         } else if (!gameState.board.includes(null)) {
           gameState.winner = "draw"
         }
+        console.log('Move made at index:', index)
 
         io.emit('gameState', gameState)
       })
 
-      socket.on('resetGame', () => {
+      socket.on('restartGame', () => {
         gameState = {
           board: Array(9).fill(null),
           xIsNext: true,
           winner: "none"
         }
         io.emit('gameState', gameState)
+        console.log('Restarting game:', gameState)
       })
 
       socket.on('disconnect', () => {

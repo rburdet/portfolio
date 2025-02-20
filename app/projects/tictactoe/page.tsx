@@ -7,38 +7,34 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { socket } from "./socket";
 
+function onConnect() {
+  console.log("connected ");
+}
+
+function onDisconnect() {
+  console.log("disconnected ");
+}
+
 export default function TicTacToePage() {
   const [gameState, setGameState] = useState({
     board: Array(9).fill(null),
     xIsNext: true,
     winner: "none",
   });
-  const [isConnected, setIsConnected] = useState(false);
-  const [transport, setTransport] = useState("N/A");
+
+  const gameStateUpdate = (data) => {
+    console.log("state update ", data);
+    setGameState(data);
+  };
 
   useEffect(() => {
     if (socket?.connected) {
       onConnect();
     }
 
-    function onConnect() {
-      setIsConnected(true);
-      setTransport(socket.io.engine.transport.name);
-
-      console.log('connected ');
-      socket.io.engine.on("upgrade", (transport) => {
-        setTransport(transport.name);
-        console.log('trasnport ', transport);
-      });
-    }
-
-    function onDisconnect() {
-      setIsConnected(false);
-      setTransport("N/A");
-    }
-
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
+    socket.on("gameState", gameStateUpdate);
 
     return () => {
       socket.off("connect", onConnect);

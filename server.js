@@ -1,6 +1,7 @@
 import { createServer } from "node:http";
 import next from "next";
-import { Server as SocketIOServer } from 'socket.io'
+import { Server as SocketIOServer } from "socket.io";
+import { faker } from '@faker-js/faker';
 
 const dev = process.env.NODE_ENV !== "production";
 const hostname = "localhost";
@@ -9,71 +10,150 @@ const port = 3000;
 const app = next({ dev, hostname, port });
 const handler = app.getRequestHandler();
 
-let gameState = {
-  board: Array(9).fill(null),
-  xIsNext: true,
-  winner: "none"
-}
-
+// Map of boardIds -> games
+const gameRooms = new Map();
 
 function calculateWinner(squares) {
   const lines = [
-    [0, 1, 2], [3, 4, 5], [6, 7, 8],
-    [0, 3, 6], [1, 4, 7], [2, 5, 8],
-    [0, 4, 8], [2, 4, 6]
-  ]
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    [0, 4, 8],
+    [2, 4, 6],
+  ];
 
   for (const [a, b, c] of lines) {
     if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-      return squares[a]
+      return squares[a];
     }
   }
-  return null
+  return null;
 }
-
 
 app.prepare().then(() => {
   const httpServer = createServer(handler);
 
   const io = new SocketIOServer(httpServer);
 
-    io.on('connection', (socket) => {
-      console.log('Client connected')
-      
-      socket.emit('gameState', gameState)
+  io.on("connection", (socket) => {
+    console.log("Client connected");
 
-      socket.on('makeMove', (index) => {
-        
-        if (gameState.board[index] || gameState.winner !== "none") return
+    socket.on("createBoard", () => {
+      // Generate a short noun (4-6 letters)
+      const boardId = faker.word.noun({ length: { min: 5, max: 7 } });
 
-        gameState.board[index] = gameState.xIsNext ? 'X' : 'O'
-        gameState.xIsNext = !gameState.xIsNext
-
-        const winner = calculateWinner(gameState.board)
-        if (winner) {
-          gameState.winner = winner
-        } else if (!gameState.board.includes(null)) {
-          gameState.winner = "draw"
-        }
-        console.log('Move made at index:', index)
-
-        io.emit('gameState', gameState)
-      })
-
-      socket.on('restartGame', () => {
-        gameState = {
+      // Create new game room
+      gameRooms.set(boardId, {
+        gameState: {
           board: Array(9).fill(null),
           xIsNext: true,
-          winner: "none"
+          winner: "none",
+        },
+        players: {
+          X: socket.id  // First player is always X
         }
-        io.emit('gameState', gameState)
-        console.log('Restarting game:', gameState)
-      })
+      });
 
-      socket.on('disconnect', () => {
-        console.log('Client disconnected')
-      })
-    })
+      socket.join(boardId);
+      socket.emit("boardCreated", { boardId, role: 'X' });
+    });
+
+    socket.on("joinBoard", (boardId) => {
+      const room = gameRooms.get(boardId);
+
+      if (!room) {
+        socket.emit("error", "Board not found");
+        return;
+      }
+
+      if (room.players.X && room.players.O) {
+        socket.emit("error", "Board is full");
+        return;
+      }
+
+      // Assign role O to second player
+      if (!room.players.O) {
+        room.players.O = socket.id;
+        socket.join(boardId);
+        gameRooms.set(boardId, room);
+
+        // Emit current game state and role to the joining player
+        socket.emit("gameState", room.gameState);
+        socket.emit("roleAssigned", 'O');
+
+        // Notify all players that the game can start
+        io.to(boardId).emit("playerJoined", 2);
+      }
+    });
+
+    socket.on("makeMove", ({ boardId, index }) => {
+      const room = gameRooms.get(boardId);
+      if (!room) return;
+
+      const { gameState } = room;
+
+      // Check if it's the player's turn and they're making a valid move
+      const currentPlayer = gameState.xIsNext ? 'X' : 'O';
+      if (
+        (room.players[currentPlayer] !== socket.id) || // Not this player's turn
+        gameState.board[index] || // Square already filled
+        gameState.winner !== "none" // Game already won
+      ) {
+        socket.emit("error", "Not your turn or invalid move");
+        return;
+      }
+
+      gameState.board[index] = currentPlayer;
+      gameState.xIsNext = !gameState.xIsNext;
+
+      const winner = calculateWinner(gameState.board);
+      if (winner) {
+        gameState.winner = winner;
+      } else if (!gameState.board.includes(null)) {
+        gameState.winner = "draw";
+      }
+
+      room.gameState = gameState;
+      gameRooms.set(boardId, room);
+
+      io.to(boardId).emit("gameState", gameState);
+    });
+
+    socket.on("resetGame", (boardId) => {
+      const room = gameRooms.get(boardId);
+      if (!room) return;
+
+      room.gameState = {
+        board: Array(9).fill(null),
+        xIsNext: true,
+        winner: "none",
+      };
+
+      gameRooms.set(boardId, room);
+      io.to(boardId).emit("gameState", room.gameState);
+    });
+
+    socket.on("disconnect", () => {
+      // Remove player from any game rooms they were in
+      gameRooms.forEach((room, boardId) => {
+        const playerIndex = room.players.indexOf(socket.id);
+        if (playerIndex !== -1) {
+          room.players.splice(playerIndex, 1);
+          if (room.players.length === 0) {
+            gameRooms.delete(boardId);
+          } else {
+            gameRooms.set(boardId, room);
+            io.to(boardId).emit("playerLeft", room.players.length);
+          }
+        }
+      });
+
+      console.log("Client disconnected");
+    });
+  });
 
   httpServer
     .once("error", (err) => {
@@ -84,5 +164,3 @@ app.prepare().then(() => {
       console.log(`> Ready on http://${hostname}:${port}`);
     });
 });
-
-

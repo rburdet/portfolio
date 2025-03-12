@@ -28,7 +28,7 @@ export default function Home() {
             <Link href="/projects">PROJECTS</Link>
           </Button>
           <Button variant="outline" className="w-full" asChild>
-            <Link href="https://github.com/yourusername" target="_blank">
+            <Link href="https://github.com/rburdet" target="_blank">
               <Github className="w-4 h-4 mr-2" />
               GITHUB
             </Link>

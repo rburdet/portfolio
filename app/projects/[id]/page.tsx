@@ -29,7 +29,7 @@ export default function ProjectPage() {
               <CardTitle className="font-mono">Description</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground">{project.longDescription}</p>
+              <p className="text-muted-foreground">{project.description}</p>
               <div className="flex flex-wrap gap-2 mt-4">
                 {project.technologies.map((tech) => (
                   <Badge key={tech} variant="secondary">
@@ -37,20 +37,6 @@ export default function ProjectPage() {
                   </Badge>
                 ))}
               </div>
-            </CardContent>
-          </Card>
-        </section>
-
-        <section>
-          <Card>
-            <CardHeader>
-              <CardTitle className="font-mono">Code Snippet</CardTitle>
-              <CardDescription>A key part of the project's implementation</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <pre className="p-4 bg-muted rounded-md overflow-x-auto">
-                <code>{project.codeSnippet}</code>
-              </pre>
             </CardContent>
           </Card>
         </section>

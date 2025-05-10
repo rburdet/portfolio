@@ -12,7 +12,7 @@ interface KVNamespace {
 
 // Define environment type
 interface Env {
-  WORKOUT_KV: KVNamespace;
+  WORKOUT_DATA: KVNamespace;
 }
 
 // API endpoint to get workout history (dates of completed workouts)
@@ -33,10 +33,10 @@ export async function GET(request: NextRequest) {
       try {
         // Access Cloudflare KV binding
         const env = process.env as unknown as Env;
-        const KV = env.WORKOUT_KV;
+        const KV = env.WORKOUT_DATA;
         
         if (!KV) {
-          console.error('WORKOUT_KV binding not found');
+          console.error('WORKOUT_DATA binding not found');
           return NextResponse.json(
             { error: 'KV store not configured' },
             { status: 500 }

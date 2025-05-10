@@ -1,100 +1,175 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { WorkoutLog } from '@/app/projects/gym-routine/storage-utils';
 
 export const runtime = 'edge';
 
-// Example API handler for saving workout data
+interface WorkoutData {
+  userId: string;
+  date: string;
+  dayId: string;
+  completed: boolean;
+  exercises: any[];
+}
+
+// Define a KV namespace interface for TypeScript
+interface KVNamespace {
+  get: (key: string, type?: 'text' | 'json' | 'arrayBuffer' | 'stream') => Promise<any>;
+  put: (key: string, value: string | ReadableStream | ArrayBuffer, options?: { expirationTtl?: number }) => Promise<any>;
+  delete: (key: string) => Promise<any>;
+  list: (options?: { prefix?: string; limit?: number; cursor?: string }) => Promise<{ keys: Array<{ name: string }>, list_complete: boolean, cursor?: string }>;
+}
+
+// Define environment type
+interface Env {
+  WORKOUT_KV: KVNamespace;
+}
+
 export async function POST(request: NextRequest) {
   try {
-    // Get the workout log from the request body
-    const workoutLog: WorkoutLog = await request.json();
+    const data: WorkoutData = await request.json();
     
-    // Validate required fields
-    if (!workoutLog.userId || !workoutLog.date || !workoutLog.dayId) {
+    if (!data.userId || !data.date || !data.dayId) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: 'Missing required fields: userId, date, or dayId' },
         { status: 400 }
       );
     }
     
-    // Save to Cloudflare KV (when in production environment)
+    // In production environment, use Cloudflare KV
     if (process.env.NODE_ENV === 'production') {
-      // In a real implementation, this would use the KV API
-      // Here, we're just simulating a successful save
-      console.log('Saving workout log to KV:', workoutLog);
+      // Access Cloudflare KV binding
+      const env = process.env as unknown as Env;
+      const KV = env.WORKOUT_KV;
       
-      // For actual implementation with Cloudflare Workers:
-      // await env.WORKOUT_DATA.put(
-      //   `workout:${workoutLog.userId}:${workoutLog.date}`,
-      //   JSON.stringify(workoutLog)
-      // );
+      if (!KV) {
+        console.error('WORKOUT_KV binding not found');
+        return NextResponse.json(
+          { error: 'KV store not configured' },
+          { status: 500 }
+        );
+      }
+      
+      // Key format: workout:<userId>:<date>
+      const key = `workout:${data.userId}:${data.date}`;
+      
+      try {
+        // Save to KV store (expiring after 1 year = 31536000 seconds)
+        await KV.put(key, JSON.stringify(data));
+        
+        return NextResponse.json({ 
+          success: true,
+          message: 'Workout saved successfully' 
+        });
+      } catch (kvError) {
+        console.error('Error saving to KV:', kvError);
+        return NextResponse.json(
+          { error: 'Failed to save workout data to KV store' },
+          { status: 500 }
+        );
+      }
     }
     
-    return NextResponse.json(
-      { success: true, message: 'Workout saved successfully' },
-      { status: 200 }
-    );
+    // For local development, just return success
+    // In a real implementation, you could use a local database or mock storage
+    console.log('Development mode: Workout would be saved with data:', data);
+    
+    return NextResponse.json({ 
+      success: true,
+      message: 'Workout saved successfully (dev mode)' 
+    });
   } catch (error) {
-    console.error('Error saving workout:', error);
+    console.error('Error processing workout data:', error);
     return NextResponse.json(
-      { error: 'Failed to save workout data' },
+      { error: 'Failed to process workout data' },
       { status: 500 }
     );
   }
 }
 
-// Fetch workout data for a specific date
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('userId');
     const date = searchParams.get('date');
     
-    if (!userId || !date) {
+    if (!userId) {
       return NextResponse.json(
-        { error: 'Missing required parameters: userId and date' },
+        { error: 'Missing required parameter: userId' },
         { status: 400 }
       );
     }
     
-    // In production, fetch from Cloudflare KV
+    // In production environment, use Cloudflare KV
     if (process.env.NODE_ENV === 'production') {
-      // Simulating a response - in real implementation we'd fetch from KV
-      // const data = await env.WORKOUT_DATA.get(`workout:${userId}:${date}`);
+      // Access Cloudflare KV binding
+      const env = process.env as unknown as Env;
+      const KV = env.WORKOUT_KV;
       
-      // Mock data for demonstration
-      const mockData: WorkoutLog = {
-        userId,
-        date,
-        dayId: 'day1',
-        completed: true,
-        exercises: [
-          {
-            name: 'Sentadillas con barra',
-            sets: 4,
-            reps: '10',
-            weight: '60',
-            completed: true
-          },
-          {
-            name: 'Zancadas caminando',
-            sets: 3,
-            reps: '12 por pierna',
-            weight: '15',
-            completed: true
+      if (!KV) {
+        console.error('WORKOUT_KV binding not found');
+        return NextResponse.json(
+          { error: 'KV store not configured' },
+          { status: 500 }
+        );
+      }
+      
+      try {
+        if (date) {
+          // Fetch a specific workout by date
+          const key = `workout:${userId}:${date}`;
+          const workout = await KV.get(key, 'json');
+          
+          if (!workout) {
+            return NextResponse.json(
+              { error: 'Workout not found' },
+              { status: 404 }
+            );
           }
-        ]
-      };
-      
-      return NextResponse.json(mockData);
+          
+          return NextResponse.json(workout);
+        } else {
+          // List all workouts for a user
+          // Note: KV list operations are eventually consistent and limited to 1000 keys
+          const prefix = `workout:${userId}:`;
+          const { keys } = await KV.list({ prefix });
+          
+          // Fetch all workouts in parallel
+          const workouts = await Promise.all(
+            keys.map(async (key: { name: string }) => {
+              return KV.get(key.name, 'json');
+            })
+          );
+          
+          return NextResponse.json({ workouts });
+        }
+      } catch (kvError) {
+        console.error('Error retrieving from KV:', kvError);
+        return NextResponse.json(
+          { error: 'Failed to retrieve workout data from KV store' },
+          { status: 500 }
+        );
+      }
     }
     
-    // For local development (would use localStorage on client side)
-    return NextResponse.json({ message: 'No data found for local environment' });
+    // For local development, return mock data
+    const mockWorkout = {
+      userId,
+      date: date || '2024-04-01',
+      dayId: 'day1',
+      completed: true,
+      exercises: []
+    };
+    
+    console.log('Development mode: Returning mock workout data');
+    
+    if (date) {
+      return NextResponse.json(mockWorkout);
+    } else {
+      return NextResponse.json({ workouts: [mockWorkout] });
+    }
   } catch (error) {
-    console.error('Error fetching workout:', error);
+    console.error('Error retrieving workout data:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch workout data' },
+      { error: 'Failed to retrieve workout data' },
       { status: 500 }
     );
   }

@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect, useMemo, useRef } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { workoutRoutine } from "./workout-config"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -31,6 +31,26 @@ export default function GymRoutinePage() {
   const [completedDates, setCompletedDates] = useState<Date[]>([])
   const [isLoadingHistory, setIsLoadingHistory] = useState(true)
   const [activeDay, setActiveDay] = useState(todayRoutineId)
+  const tabsListRef = useRef<HTMLDivElement>(null)
+  const initialSelectedTabRef = useRef<HTMLButtonElement>(null)
+  
+  // Scroll to the initial selected tab when component mounts
+  useEffect(() => {
+    if (tabsListRef.current && initialSelectedTabRef.current) {
+      const tabsList = tabsListRef.current
+      const selectedTab = initialSelectedTabRef.current
+      
+      // Get the tab's position relative to the tabsList
+      const tabsListRect = tabsList.getBoundingClientRect()
+      const selectedTabRect = selectedTab.getBoundingClientRect()
+      
+      // Calculate scroll position to center the tab
+      const scrollPosition = selectedTabRect.left - tabsListRect.left - (tabsListRect.width / 2) + (selectedTabRect.width / 2)
+      
+      // Scroll to the tab
+      tabsList.scrollLeft = scrollPosition
+    }
+  }, [])
   
   // Fetch workout history when component mounts
   useEffect(() => {
@@ -121,7 +141,7 @@ export default function GymRoutinePage() {
       </Link>
       <h1 className="text-4xl font-mono tracking-tight md:text-5xl mb-8">My Gym Routine</h1>
 
-      <div className="grid gap-8 md:grid-cols-[2fr_1fr]">
+      <div>
         <div className="space-y-8">
           <Card>
             <CardHeader>
@@ -129,12 +149,13 @@ export default function GymRoutinePage() {
             </CardHeader>
             <CardContent>
               <Tabs defaultValue={todayRoutineId} className="w-full" onValueChange={setActiveDay}>
-                <TabsList className="flex w-full overflow-x-auto pb-2 md:pb-0 md:grid md:grid-cols-7">
+                <TabsList ref={tabsListRef} className="flex w-full justify-start overflow-x-auto pb-2 md:pb-0 md:grid md:grid-cols-7">
                   {workoutRoutine.map((day, idx) => (
                     <TabsTrigger 
                       key={day.id} 
                       value={day.id}
                       className="whitespace-nowrap"
+                      ref={day.id === todayRoutineId ? initialSelectedTabRef : undefined}
                     >
                       {weekdayNames[idx]}
                     </TabsTrigger>
@@ -235,22 +256,6 @@ export default function GymRoutinePage() {
               </Tabs>
             </CardContent>
           </Card>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle className="font-mono">Track Your Progress</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
-                Use the tables above to track your weights and progress over time.
-              </p>
-              <p className="text-muted-foreground mt-4">
-                <Link href="/exercises" className="text-primary hover:text-primary/80">
-                  View exercise tracker
-                </Link>
-              </p>
-            </CardContent>
-          </Card>
         </div>
         
         <div>
@@ -260,10 +265,7 @@ export default function GymRoutinePage() {
             </CardHeader>
             <CardContent>
               <div className="flex flex-col gap-4">
-                <p className="text-sm text-muted-foreground">
-                  Your workout activity over the last year.
-                </p>
-                <div className="my-4">
+                <div className="my-4 overflow-x-auto">
                   <ActivityHeatmap dates={completedDates} />
                 </div>
               </div>

@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { format, isSameDay, startOfWeek, addWeeks, getMonth, getYear } from "date-fns"
+import { format, isSameDay, startOfWeek, addWeeks, getMonth, getYear, startOfYear } from "date-fns"
 import { cn } from "@/lib/utils"
 
 interface ActivityHeatmapProps {
@@ -16,10 +16,13 @@ export function ActivityHeatmap({ dates, className }: ActivityHeatmapProps) {
   const selectedDays = [0, 2, 4, 6];
   const daysToShow = ["Sun", "Tue", "Thu", "Sat"];
 
-  // Generate week start dates (columns)
-  const today = new Date();
+  // Generate week start dates (columns) starting from January 1st of the current year
+  const currentYear = new Date().getFullYear();
+  const startDate = startOfYear(new Date(currentYear, 0, 1)); // January 1st of current year
+  const firstWeekStart = startOfWeek(startDate, { weekStartsOn: 0 });
+  
   const weekStarts = Array.from({ length: numWeeks }, (_, i) =>
-    startOfWeek(addWeeks(today, -numWeeks + i + 1), { weekStartsOn: 0 })
+    addWeeks(firstWeekStart, i)
   );
 
   // Build month header with colSpan

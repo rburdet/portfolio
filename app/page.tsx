@@ -40,14 +40,14 @@ export default function Home() {
 
         <section className="mb-16 md:mb-24">
           <h2 className="mb-8 text-2xl font-mono">Featured Work</h2>
-          <ProjectGrid projects={projects.slice(0, 6)} />
+          <ProjectGrid projects={projects} />
         </section>
 
         <section className="grid gap-8 mb-16 md:mb-24 md:grid-cols-2">
           <div className="space-y-4">
             <h3 className="text-xl font-mono">Coding Exercises</h3>
             <p className="text-muted-foreground">
-              Solutions to algorithmic challenges and data structure problems from LeetCode.
+              WIP: I need to pull all of the leetcode exercises I've done and display them here.
             </p>
             <Button variant="outline" className="w-full sm:w-auto" asChild>
               <Link href="/exercises">VIEW EXERCISES</Link>

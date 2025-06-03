@@ -64,8 +64,11 @@ export default function GymRoutinePage() {
         if (response.ok) {
           const data = await response.json()
           
-          // Convert string dates to Date objects
-          const dates = data.dates.map((dateStr: string) => new Date(dateStr))
+          // Convert string dates to Date objects in local timezone
+          const dates = data.dates.map((dateStr: string) => {
+            const [year, month, day] = dateStr.split('-').map(Number)
+            return new Date(year, month - 1, day) // month is 0-indexed
+          })
           setCompletedDates(dates)
         } else {
           console.error("Failed to fetch workout history")

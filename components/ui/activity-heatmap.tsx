@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { format, isSameDay, startOfWeek, addWeeks, getMonth, getYear, startOfYear } from "date-fns"
+import { format, isSameDay, startOfWeek, addWeeks, addDays, getMonth, getYear, startOfYear } from "date-fns"
 import { cn } from "@/lib/utils"
 
 interface ActivityHeatmapProps {
@@ -80,8 +80,7 @@ export function ActivityHeatmap({ dates, className }: ActivityHeatmapProps) {
                   {daysToShow[rowIndex]}
                 </td>
                 {weekStarts.map((weekStart, colIndex) => {
-                  const cellDate = new Date(weekStart);
-                  cellDate.setDate(cellDate.getDate() + day);
+                  const cellDate = addDays(weekStart, day);
                   const count = dates.filter(date => isSameDay(date, cellDate)).length;
                   const intensity = count > 0 ? Math.min(count, 4) : 0;
                   return (

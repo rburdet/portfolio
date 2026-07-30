@@ -118,4 +118,28 @@ export const projects: Project[] = [
 		technologies: ["Chrome Extension", "JavaScript"],
 		status: "code",
 	},
+	{
+		id: "clavos",
+		title: "Clavos Estilbieser",
+		description:
+			"Product site for a spiral-nail and pneumatic-tool manufacturer, with PDF quote generation",
+		technologies: ["Next.js", "TypeScript", "Tailwind CSS", "Cloudflare Workers"],
+		externalUrl: "https://clavos.rburdet.com",
+	},
+	{
+		id: "expensas",
+		title: "ExPensa",
+		description:
+			"AI-audited building expense reports: spend breakdowns, delinquency and cash flow, with findings grounded in Argentine property law",
+		technologies: ["React Router v7", "Cloudflare Workers", "Recharts", "Tailwind CSS"],
+		externalUrl: "https://expensas.rburdet.com",
+	},
+	{
+		id: "classic",
+		title: "Clásicos AR",
+		description:
+			"Marketplace of CIVAC-preapproved classic American cars scraped from Hemmings, with an import cost calculator for Argentina",
+		technologies: ["Next.js", "Cloudflare Workers", "D1", "Cron Triggers"],
+		externalUrl: "https://classic.rburdet.com",
+	},
 ];

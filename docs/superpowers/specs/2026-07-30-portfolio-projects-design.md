@@ -15,12 +15,12 @@ la infra necesaria (dominios en Cloudflare, tunnel en la VPS de Hetzner).
 
 | Proyecto | Dominio | Plataforma | Notas |
 |---|---|---|---|
-| `clavos` | `clavos.rburdet.com` | Cloudflare Workers | Ya tiene wrangler.toml + open-next |
-| `expensas` | `expensas.rburdet.com` | Cloudflare Workers | React Router v7 SSR; se publica con los datos reales tal cual (decisión de Rodrigo) |
-| `classic` | `classic.rburdet.com` | Cloudflare Workers + D1 | Dos workers (web + scraper) con D1 compartida |
-| `portolimpic` | `portolimpic.rburdet.com` | Cloudflare (static assets) | Vite + React |
-| `tuyairbnb` | `tuyairbnb.rburdet.com` | Cloudflare Workers + D1 | Detrás de **Cloudflare Access** (Zero Trust): allow solo el email de Rodrigo. Sin cambios de código |
-| `guardiapp` | `guardiapp.rburdet.com` | VPS Hetzner | Named tunnel de cloudflared + systemd (ver Infra) |
+| `clavos` | `clavos.rburdet.com` | Cloudflare Workers | Ya tiene wrangler.toml + open-next. **Deploy nuevo** |
+| `expensas` | `expensas.rburdet.com` | Cloudflare Workers | React Router v7 SSR; se publica con los datos reales tal cual (decisión de Rodrigo). El worker se renombra de `react-router-app` a `expensas`. No es repo git: se inicializa. **Deploy nuevo** |
+| `classic` | `classic.rburdet.com` | Cloudflare Workers + D1 | Dos workers (web con vinext + scraper con cron) y D1 `classic-cars-db` compartida; migraciones 0001–0008 en `db/migrations/`. **Deploy nuevo** |
+| `portolimpic` | `wind.rburdet.com` | Cloudflare Workers | **Ya deployado**: es la app de la card "Wind Conditions". Solo se actualiza esa card (descripción/tecnologías) |
+| `tuyairbnb` | `airbnb.rburdet.com` | Cloudflare Workers + D1 | **Ya deployado y ya detrás de Cloudflare Access** (verificado). Solo falta la card |
+| `guardiapp` | `guardias.rburdet.com` | VPS Hetzner | **Ya live** vía named tunnel "guardias" + start.sh + crontab @reboot. Se deja el setup como está; solo falta la card |
 | `world-tides` | `tides.rburdet.com` (a futuro) | — | **Proyecto aparte**: hay que desarrollarlo desde cero (src/ vacío). Tendrá su propio brainstorm/spec. Su card se agrega recién cuando esté live |
 
 ### B — Card sin demo viva
@@ -53,7 +53,13 @@ En `lib/projects.ts`:
   todas de entrada.
 
 En los componentes (`components/project-grid.tsx`): render del link al repo y
-del estado `code`. Se mantiene el estilo actual de cards, **sin screenshots**.
+del estado `code`. Ojo: hoy la card sin `externalUrl` linkea a
+`/projects/<id>` (página interna); para las cards `code` el título no debe ser
+link (o linkea a `repoUrl` si existe). Se mantiene el estilo actual de cards,
+**sin screenshots**.
+
+Además se actualiza la card existente **"Wind Conditions"** con la descripción
+y tecnologías reales de portolimpic (Cloudflare Workers, KV, cron, Web Push).
 
 ## Infra
 
@@ -71,30 +77,28 @@ esquema que gym/mareas/encarta). CI con GitHub Actions queda como mejora futura.
 
 ### Cloudflare Access (tuyairbnb)
 
-Aplicación Zero Trust sobre `tuyairbnb.rburdet.com` con política allow para el
-email de Rodrigo. Login con Google/OTP manejado por Cloudflare; el worker no se toca.
+**Ya configurado y verificado**: `airbnb.rburdet.com` redirige al login de
+Access. No hay nada que hacer.
 
 ### VPS Hetzner (guardiapp)
 
-Hoy: apps corriendo en puertos de desarrollo con tunnels efímeros de cloudflared.
-Objetivo:
-
-- **Named tunnel** de cloudflared (config persistente, ingress
-  `guardiapp.rburdet.com → localhost:<puerto>`), corriendo como servicio.
-- Backend de guardiapp (FastAPI + OR-Tools) como **servicio systemd** en modo
-  producción (no dev server).
+**Se deja como está** (decisión de Rodrigo): named tunnel "guardias" +
+`start.sh` + crontab @reboot ya sobreviven reinicios y sirven
+`guardias.rburdet.com` en modo producción.
 
 ## Orden de trabajo
 
-1. **Portfolio**: extender modelo, agregar cards B (quedan listas ya) y deploy del portfolio.
-2. **Deploys Cloudflare** uno por uno (clavos → expensas → classic → portolimpic → tuyairbnb+Access), agregando el `externalUrl` a cada card al verificar que anda.
-3. **VPS**: formalizar guardiapp (systemd + named tunnel) y agregar su card.
-4. **Apex** `rburdet.com` → portfolio.
-5. **world-tides**: brainstorm + spec propios; fuera del alcance de este trabajo.
+1. **Portfolio**: extender modelo; agregar cards B + cards de lo ya live
+   (tuyairbnb → airbnb.rburdet.com, guardiapp → guardias.rburdet.com) y
+   actualizar la card Wind.
+2. **Deploys Cloudflare** uno por uno (clavos → expensas → classic),
+   agregando la card de cada uno al verificar que anda.
+3. **Apex** `rburdet.com` → portfolio, y deploy final del portfolio.
+4. **world-tides**: brainstorm + spec propios; fuera del alcance de este trabajo.
 
 ## Fuera de alcance
 
 - Desarrollo de world-tides (proyecto aparte).
 - CI/CD con GitHub Actions.
 - Screenshots en las cards.
-- Migrar a Docker en la VPS (se eligió systemd).
+- Cambios en la VPS (guardiapp queda con su setup actual).

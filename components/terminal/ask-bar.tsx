@@ -121,10 +121,14 @@ export default function AskBar() {
 
 	return (
 		<div className="pointer-events-none fixed inset-x-0 bottom-0 z-50">
-			<div className="mx-auto max-w-4xl px-2 pb-2 sm:px-4 md:px-6">
+			<div
+				className="mx-auto max-w-4xl px-2 sm:px-4 md:px-6"
+				style={{ paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))" }}
+			>
 				{transcript.length > 0 && (
 					<div
 						ref={panelRef}
+						aria-live="polite"
 						className="pointer-events-auto mb-1 max-h-[50vh] overflow-y-auto rounded-t border border-b-0 border-term-border bg-term-surface/95 p-3 text-xs backdrop-blur"
 					>
 						{transcript.map((entry, i) => (

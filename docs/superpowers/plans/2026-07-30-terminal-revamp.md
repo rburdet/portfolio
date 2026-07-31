@@ -6,7 +6,7 @@
 
 **Architecture:** Route group `app/(terminal)/` con layout de marco de terminal para home/about/projects/contact; componentes terminal en `components/terminal/`; endpoint edge `POST /api/ask` con binding de Workers AI y rate limit en KV; `lib/ai-context.ts` genera el system prompt desde `lib/projects.ts`.
 
-**Tech Stack:** Next.js 14 (App Router) + @cloudflare/next-on-pages, Tailwind, Workers AI (`@cf/meta/llama-3.1-8b-instruct`), Cloudflare KV.
+**Tech Stack:** Next.js 14 (App Router) + @cloudflare/next-on-pages, Tailwind, Workers AI (`@cf/meta/llama-3.1-8b-instruct-fp8`; el modelo original fue deprecado por Cloudflare en 2026; se usa el sibling fp8), Cloudflare KV.
 
 **Spec:** `docs/superpowers/specs/2026-07-30-terminal-revamp-design.md`
 
@@ -19,7 +19,7 @@
 - NO tocar: `app/exercises/`, `app/projects/tictactoe/`, `app/projects/[id]/`, `app/projects/autocomplete|constellation|gym-routine|takehome-project/`, `app/api/workout/`, `workers/`, `public/sw.js`. Esas rutas deben seguir respondiendo 200.
 - Reglas de link de cards (ya existentes, conservar): `status: "code"` sin `repoUrl` → título sin link; `code` con `repoUrl` → link al repo; resto → `externalUrl` o fallback interno `/projects/<id>`.
 - Sin framework de tests (no agregar vitest/jest); verificación = `npm run build` + curl + screenshots.
-- Modelo AI: `@cf/meta/llama-3.1-8b-instruct`. Rate limit: 20/día/IP, KV `ASK_RATELIMIT`, TTL 86400.
+- Modelo AI: `@cf/meta/llama-3.1-8b-instruct-fp8`. Rate limit: 20/día/IP, KV `ASK_RATELIMIT`, TTL 86400.
 - Textos del sitio en inglés.
 
 ---
@@ -841,7 +841,7 @@ import { buildSystemPrompt } from "@/lib/ai-context";
 export const runtime = "edge";
 
 const DAILY_LIMIT = 20;
-const MODEL = "@cf/meta/llama-3.1-8b-instruct";
+const MODEL = "@cf/meta/llama-3.1-8b-instruct-fp8";
 
 interface ChatMessage {
 	role: "user" | "assistant";

@@ -79,7 +79,8 @@ Cada página abre con su "comando" como heading (componente `Prompt`):
 **Backend:**
 - `POST /api/ask` (edge runtime, Pages Function via next-on-pages).
 - Binding **Workers AI** (`ai`) declarado en `wrangler.jsonc`; modelo
-  `@cf/meta/llama-3.1-8b-instruct`, respuesta en streaming.
+  `@cf/meta/llama-3.1-8b-instruct-fp8` (el modelo original fue deprecado por
+  Cloudflare en 2026; se usa el sibling fp8), respuesta en streaming.
 - **Contexto** en `lib/ai-context.ts`: system prompt con la bio de Rodrigo +
   la data de `lib/projects.ts` serializada (única fuente de verdad de
   proyectos). El prompt restringe alcance: solo responde sobre Rodrigo y sus

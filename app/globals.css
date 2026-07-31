@@ -2,10 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
-}
-
 @layer utilities {
   .text-balance {
     text-wrap: balance;

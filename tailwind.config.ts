@@ -16,6 +16,9 @@ const config: Config = {
   ],
   theme: {
   	extend: {
+  		fontFamily: {
+  			mono: ['var(--font-mono)', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace']
+  		},
   		colors: {
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',

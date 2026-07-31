@@ -4,7 +4,7 @@ import { buildSystemPrompt } from "@/lib/ai-context";
 export const runtime = "edge";
 
 const DAILY_LIMIT = 20;
-const MODEL = "@cf/meta/llama-3.1-8b-instruct";
+const MODEL = "@cf/meta/llama-3.1-8b-instruct-fp8";
 
 interface ChatMessage {
 	role: "user" | "assistant";

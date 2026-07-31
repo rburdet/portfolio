@@ -88,10 +88,23 @@ export default function AskBar() {
 				}
 			}
 		} catch {
-			setTranscript((t) => [
-				...t,
-				{ role: "error", content: "error: model unavailable" },
-			]);
+			setTranscript((t) => {
+				const last = t[t.length - 1];
+				if (last?.role === "assistant") {
+					if (last.content === "") {
+						return [
+							...t.slice(0, -1),
+							{ role: "error", content: "error: model unavailable" },
+						];
+					}
+					return [
+						...t.slice(0, -1),
+						{ role: "assistant", content: last.content + " [truncated]" },
+						{ role: "error", content: "error: model unavailable" },
+					];
+				}
+				return [...t, { role: "error", content: "error: model unavailable" }];
+			});
 		} finally {
 			setBusy(false);
 			scrollToBottom();

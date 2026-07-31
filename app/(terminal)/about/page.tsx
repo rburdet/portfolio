@@ -109,7 +109,7 @@ export default function AboutPage() {
 				<h2 className="mb-4 text-lg text-zinc-100">## Education</h2>
 				<div className="border-l border-term-border pl-4 text-sm">
 					<p className="text-zinc-100">
-						University of Buenos Aires{" "}
+						University of Buenos Aires, Argentina{" "}
 						<span className="text-xs text-zinc-500">(2010-2018)</span>
 					</p>
 					<p className="mt-1 text-xs text-zinc-400">Software Engineering</p>

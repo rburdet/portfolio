@@ -23,6 +23,7 @@ export default function ContactPage() {
 							href={link.href}
 							target={link.href.startsWith("http") ? "_blank" : undefined}
 							rel={link.href.startsWith("http") ? "noopener noreferrer" : undefined}
+							download={link.label === "cv" ? true : undefined}
 							className="text-term-cyan hover:underline"
 						>
 							{link.value}

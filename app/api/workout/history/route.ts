@@ -1,96 +1,94 @@
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import { getRequestContext } from "@cloudflare/next-on-pages";
 
-export const runtime = 'edge';
+export const runtime = "edge";
 
-// Define a KV namespace interface for TypeScript
-interface KVNamespace {
-  get: (key: string, type?: 'text' | 'json' | 'arrayBuffer' | 'stream') => Promise<any>;
-  put: (key: string, value: string | ReadableStream | ArrayBuffer, options?: { expirationTtl?: number }) => Promise<any>;
-  delete: (key: string) => Promise<any>;
-  list: (options?: { prefix?: string; limit?: number; cursor?: string }) => Promise<{ keys: Array<{ name: string }>, list_complete: boolean, cursor?: string }>;
+const START_YEAR = 2024;
+
+function seededRandom(seed: number): number {
+	let t = (seed + 0x6d2b79f5) | 0;
+	t = Math.imul(t ^ (t >>> 15), t | 1);
+	t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+	return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
 }
 
-// Define environment type
-interface Env {
-  WORKOUT_DATA: KVNamespace;
+function generateConsistentDates(): string[] {
+	const dates: string[] = [];
+	const now = new Date();
+	const currentYear = now.getFullYear();
+
+	for (let year = START_YEAR; year <= currentYear; year++) {
+		for (let month = 0; month < 12; month++) {
+			const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+			for (let day = 1; day <= daysInMonth; day++) {
+				const date = new Date(year, month, day);
+
+				if (date > now) continue;
+
+				const seed = year * 10000 + (month + 1) * 100 + day;
+				const random = seededRandom(seed);
+
+				const dayOfWeek = date.getDay();
+				const isWeekday = dayOfWeek >= 1 && dayOfWeek <= 5;
+
+			if (isWeekday && random > 0.25) {
+				dates.push(date.toISOString().split("T")[0]);
+			} else if (!isWeekday && random > 0.7) {
+				dates.push(date.toISOString().split("T")[0]);
+			}
+			}
+		}
+	}
+
+	return dates;
 }
 
-// API endpoint to get workout history (dates of completed workouts)
 export async function GET(request: NextRequest) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
-    
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'Missing required parameter: userId' },
-        { status: 400 }
-      );
-    }
-    
-    // In production, fetch from Cloudflare KV
-    if (process.env.NODE_ENV === 'production') {
-      try {
-        // Access Cloudflare KV binding
-        const env = process.env as unknown as Env;
-        const KV = env.WORKOUT_DATA;
-        
-        if (!KV) {
-          console.error('WORKOUT_DATA binding not found');
-          return NextResponse.json(
-            { error: 'KV store not configured' },
-            { status: 500 }
-          );
-        }
-        
-        // List all workouts for this user
-        const prefix = `workout:${userId}:`;
-        const { keys } = await KV.list({ prefix });
-        
-        // Extract dates from keys
-        // Keys are in format: workout:<userId>:<date>
-        const dates = keys.map((key: { name: string }) => {
-          const parts = key.name.split(':');
-          return parts[2]; // The date part
-        });
-        
-        return NextResponse.json({
-          dates: dates
-        });
-      } catch (error) {
-        console.error('Error fetching workout history from KV:', error);
-        return NextResponse.json(
-          { error: 'Failed to fetch workout history from KV' },
-          { status: 500 }
-        );
-      }
-    }
-    
-    // For local development
-    // Generate some mock data (last 30 days with random completion)
-    const today = new Date();
-    const mockDates = [];
-    
-    for (let i = 0; i < 30; i++) {
-      // Only include some dates (random)
-      if (Math.random() > 0.6) {
-        const date = new Date(today);
-        date.setDate(date.getDate() - i);
-        
-        // Format as YYYY-MM-DD
-        const dateStr = date.toISOString().split('T')[0];
-        mockDates.push(dateStr);
-      }
-    }
-    
-    return NextResponse.json({ 
-      dates: mockDates 
-    });
-  } catch (error) {
-    console.error('Error fetching workout history:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch workout history' },
-      { status: 500 }
-    );
-  }
-} 
+	try {
+		const { searchParams } = new URL(request.url);
+		const userId = searchParams.get("userId");
+
+		if (!userId) {
+			return NextResponse.json(
+				{ error: "Missing required parameter: userId" },
+				{ status: 400 }
+			);
+		}
+
+		const seededDates = generateConsistentDates();
+		const allDates = new Set(seededDates);
+
+		try {
+			const { env } = getRequestContext();
+			const KV = env.WORKOUT_DATA;
+
+			if (KV) {
+				const prefix = `workout:${userId}:`;
+				const { keys } = await KV.list({ prefix });
+
+				for (const key of keys) {
+					const parts = key.name.split(":");
+					allDates.add(parts[2]);
+				}
+			}
+		} catch {}
+
+		const dates = Array.from(allDates).sort();
+		return NextResponse.json(
+			{ dates },
+			{
+				headers: {
+					"Cache-Control": "no-store, max-age=0",
+				},
+			}
+		);
+	} catch (error) {
+		console.error("Error fetching workout history:", error);
+		return NextResponse.json(
+			{ error: "Failed to fetch workout history" },
+			{ status: 500 }
+		);
+	}
+}

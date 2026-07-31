@@ -6,7 +6,7 @@ import { projects } from "@/lib/projects";
 
 export default function Home() {
 	return (
-		<main className="min-h-screen bg-background">
+		<main>
 			<div className="container px-4 py-16 md:py-24">
 				<div className="mb-16 md:mb-24">
 					<div className="flex items-center gap-4 mb-6">

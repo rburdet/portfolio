@@ -1,4 +1,3 @@
-import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -6,14 +5,8 @@ import { Mail, MapPin, Calendar, ExternalLink } from "lucide-react"
 
 export default function AboutPage() {
   return (
-    <main className="min-h-screen bg-background">
+    <main>
       <div className="container px-4 py-16 md:py-24">
-        <div className="mb-8">
-          <Link href="/" className="text-muted-foreground hover:text-foreground">
-            ← Back to home
-          </Link>
-        </div>
-
         <div className="mb-16">
           <h1 className="mb-6 text-4xl font-mono tracking-tight md:text-5xl">About Me</h1>
           <div className="grid gap-6 md:grid-cols-[2fr_1fr]">

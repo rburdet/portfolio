@@ -70,9 +70,6 @@ export async function POST(request: Request) {
 	if (count >= DAILY_LIMIT) {
 		return json({ error: "rate_limit" }, 429);
 	}
-	await env.ASK_RATELIMIT.put(key, String(count + 1), {
-		expirationTtl: 60 * 60 * 24,
-	});
 
 	const messages = [
 		{ role: "system", content: buildSystemPrompt() },
@@ -85,6 +82,9 @@ export async function POST(request: Request) {
 			messages,
 			stream: true,
 			max_tokens: 512,
+		});
+		await env.ASK_RATELIMIT.put(key, String(count + 1), {
+			expirationTtl: 60 * 60 * 24,
 		});
 		return new Response(stream, {
 			headers: {

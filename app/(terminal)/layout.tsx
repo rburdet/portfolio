@@ -1,4 +1,5 @@
 import Link from "next/link";
+import AskBar from "@/components/terminal/ask-bar";
 
 export default function TerminalLayout({
 	children,
@@ -32,6 +33,7 @@ export default function TerminalLayout({
 				</header>
 				<div className="flex-1 px-4 py-8 pb-24 md:px-8">{children}</div>
 			</div>
+			<AskBar />
 		</div>
 	);
 }

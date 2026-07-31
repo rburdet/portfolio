@@ -1,87 +1,39 @@
-"use client"
+import Prompt from "@/components/terminal/prompt";
 
-import type React from "react"
-
-import { useState } from "react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { LinkedinIcon as LinkedIn } from "lucide-react"
+const LINKS = [
+	{ label: "email", value: "rodrigoburdet@gmail.com", href: "mailto:rodrigoburdet@gmail.com" },
+	{ label: "github", value: "github.com/rburdet", href: "https://github.com/rburdet" },
+	{
+		label: "linkedin",
+		value: "linkedin.com/in/rodrigo-burdet-7081616a",
+		href: "https://linkedin.com/in/rodrigo-burdet-7081616a",
+	},
+	{ label: "cv", value: "Rodrigo_Burdet_CV.pdf", href: "/Rodrigo_Burdet_CV.pdf" },
+];
 
 export default function ContactPage() {
-  const [name, setName] = useState("")
-  const [email, setEmail] = useState("")
-  const [message, setMessage] = useState("")
-  const [submitted, setSubmitted] = useState(false)
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // Here you would typically send this data to your backend
-    console.log({ name, email, message })
-    setSubmitted(true)
-    // Reset form
-    setName("")
-    setEmail("")
-    setMessage("")
-  }
-
-  return (
-    <div className="container px-4 py-16 md:py-24">
-      <h1 className="text-4xl font-mono tracking-tight md:text-5xl mb-8">Contact Me</h1>
-
-      <div className="grid gap-8 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle className="font-mono">Send me a message</CardTitle>
-            <CardDescription>I'll get back to you as soon as possible.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {submitted ? (
-              <p className="text-green-600">Thank you for your message. I'll respond shortly!</p>
-            ) : (
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                    Name
-                  </label>
-                  <Input id="name" value={name} onChange={(e) => setName(e.target.value)} required />
-                </div>
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                    Email
-                  </label>
-                  <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-                </div>
-                <div>
-                  <label htmlFor="message" className="block text-sm font-medium text-gray-700">
-                    Message
-                  </label>
-                  <Textarea id="message" value={message} onChange={(e) => setMessage(e.target.value)} required />
-                </div>
-                <Button type="submit">Send Message</Button>
-              </form>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="font-mono">Connect with me</CardTitle>
-            <CardDescription>Find me on professional networks.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button variant="outline" className="w-full" asChild>
-              <Link href="https://linkedin.com/in/rodrigo-burdet-7081616a" target="_blank" rel="noopener noreferrer">
-                <LinkedIn className="w-5 h-5 mr-2" />
-                LinkedIn Profile
-              </Link>
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-  )
+	return (
+		<main className="max-w-3xl">
+			<Prompt command="cat contact" className="mb-8" />
+			<div className="space-y-2 text-sm">
+				{LINKS.map((link) => (
+					<p key={link.label}>
+						<span className="inline-block w-24 text-zinc-500">{link.label}:</span>
+						<a
+							href={link.href}
+							target={link.href.startsWith("http") ? "_blank" : undefined}
+							rel={link.href.startsWith("http") ? "noopener noreferrer" : undefined}
+							className="text-term-cyan hover:underline"
+						>
+							{link.value}
+						</a>
+					</p>
+				))}
+			</div>
+			<p className="mt-8 text-xs text-zinc-600">
+				# fastest response via email — usually within a day
+			</p>
+		</main>
+	);
 }
 

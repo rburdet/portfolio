@@ -1,52 +1,41 @@
-import Link from "next/link";
-import { Github, Linkedin, Mail } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import Prompt from "@/components/terminal/prompt";
+import Typing from "@/components/terminal/typing";
 import ProjectGrid from "@/components/project-grid";
 import { projects } from "@/lib/projects";
 
 export default function Home() {
 	return (
 		<main>
-			<div className="container px-4 py-16 md:py-24">
-				<div className="mb-16 md:mb-24">
-					<div className="flex items-center gap-4 mb-6">
-						<div className="grid w-12 h-12 bg-primary place-items-center">
-							<span className="text-2xl font-mono text-primary-foreground">
-								RB
-							</span>
-						</div>
-						<h1 className="text-4xl font-mono tracking-tight md:text-5xl">
-							Rodrigo Burdet
-						</h1>
-					</div>
-					<p className="text-xl font-mono text-muted-foreground md:text-2xl">
-						Software Engineer. Problem Solver. Builder.
+			<section className="mb-12 md:mb-16">
+				<Prompt command="whoami" className="mb-4" />
+				<h1 className="mb-3 text-3xl tracking-tight text-zinc-100 md:text-5xl">
+					<Typing text="Rodrigo Burdet" />
+				</h1>
+				<p className="text-sm text-zinc-400 md:text-base">
+					Software Engineer. Problem Solver. Builder.
+				</p>
+				<div className="mt-4 space-y-1 text-xs text-zinc-500 md:text-sm">
+					<p>
+						<span className="text-zinc-400">location:</span> Buenos Aires, Argentina
+					</p>
+					<p>
+						<span className="text-zinc-400">github:</span>{" "}
+						<a
+							href="https://github.com/rburdet"
+							target="_blank"
+							rel="noopener noreferrer"
+							className="text-term-cyan hover:underline"
+						>
+							github.com/rburdet
+						</a>
 					</p>
 				</div>
+			</section>
 
-				<nav className="grid gap-4 mb-16 md:mb-24 sm:grid-cols-4">
-					<Button variant="outline" className="w-full" asChild>
-						<Link href="/about">ABOUT</Link>
-					</Button>
-					<Button variant="outline" className="w-full" asChild>
-						<Link href="/projects">PROJECTS</Link>
-					</Button>
-					<Button variant="outline" className="w-full" asChild>
-						<Link href="https://github.com/rburdet" target="_blank">
-							<Github className="w-4 h-4 mr-2" />
-							GITHUB
-						</Link>
-					</Button>
-					<Button variant="outline" className="w-full" asChild>
-						<Link href="/contact">CONTACT</Link>
-					</Button>
-				</nav>
-
-				<section className="mb-16 md:mb-24">
-					<h2 className="mb-8 text-2xl font-mono">Projects</h2>
-					<ProjectGrid projects={projects} />
-				</section>
-			</div>
+			<section>
+				<Prompt command="ls projects/" className="mb-6" />
+				<ProjectGrid projects={projects} />
+			</section>
 		</main>
 	);
 }

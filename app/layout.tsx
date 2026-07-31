@@ -1,6 +1,12 @@
 import type { Metadata } from 'next'
+import { JetBrains_Mono } from 'next/font/google'
 import './globals.css'
 import Script from 'next/script'
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  variable: '--font-mono',
+})
 
 export const metadata: Metadata = {
   title: 'Rodrigo Burdet | Portfolio',
@@ -16,7 +22,7 @@ export const metadata: Metadata = {
       { url: '/icons/apple-touch-icon.svg', sizes: '180x180', type: 'image/svg+xml' },
     ],
   },
-  themeColor: '#000000',
+  themeColor: '#09090b',
 }
 
 export default function RootLayout({
@@ -25,12 +31,12 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={`dark ${jetbrainsMono.variable}`}>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-        <meta name="theme-color" content="#000000" />
+        <meta name="theme-color" content="#09090b" />
       </head>
-      <body>
+      <body className="font-mono">
         {children}
         <Script
           id="register-service-worker"

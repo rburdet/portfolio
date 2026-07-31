@@ -66,6 +66,13 @@ const config: Config = {
   				'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
   				border: 'hsl(var(--sidebar-border))',
   				ring: 'hsl(var(--sidebar-ring))'
+  			},
+  			term: {
+  				green: '#34d399',
+  				cyan: '#7dd3fc',
+  				red: '#f87171',
+  				surface: '#111113',
+  				border: '#27272a'
   			}
   		},
   		borderRadius: {
@@ -93,7 +100,8 @@ const config: Config = {
   		},
   		animation: {
   			'accordion-down': 'accordion-down 0.2s ease-out',
-  			'accordion-up': 'accordion-up 0.2s ease-out'
+  			'accordion-up': 'accordion-up 0.2s ease-out',
+  			blink: 'blink 1s step-end infinite'
   		}
   	}
   },

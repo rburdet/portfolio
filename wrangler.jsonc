@@ -4,11 +4,19 @@
   "compatibility_flags": ["nodejs_compat"],
   "pages_build_output_dir": ".vercel/output/static",
 
+  "ai": {
+    "binding": "AI"
+  },
+
   "kv_namespaces": [
     {
       "binding": "WORKOUT_DATA",
       "id": "192278a040b446db9421c980da5f8997",
       "preview_id": "864246d0f13448238ca48f49040079cd"
+    },
+    {
+      "binding": "ASK_RATELIMIT",
+      "id": "be88792d5f344e91a2d4e6795c56be21"
     }
   ]
 }

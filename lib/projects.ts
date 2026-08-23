@@ -142,4 +142,12 @@ export const projects: Project[] = [
 		technologies: ["Next.js", "Cloudflare Workers", "D1", "Cron Triggers"],
 		externalUrl: "https://classic.rburdet.com",
 	},
+	{
+		id: "audit",
+		title: "Website Audits",
+		description:
+			"UX, conversion and SEO audits for small hospitality and sports businesses, published as public case studies",
+		technologies: ["Next.js", "TypeScript", "Tailwind CSS", "Cloudflare Pages"],
+		externalUrl: "https://audit.rburdet.com",
+	},
 ];
